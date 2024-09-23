@@ -15,7 +15,7 @@ class CategoryRepositoryImpl implements CategoryRepository
 
     public function Update(Category $category): Category
     {
-        Category::find($category->id)->update($category);
+        $category->save();
         return $category;
     }
 

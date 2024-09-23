@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Models\Category;
-use App\Models\User;
 use App\Repositories\CategoryRepository;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CategoryServiceImpl implements CategoryService
