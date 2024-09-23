@@ -2,23 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Repository\CustomerRepository;
+use App\Repositories\CustomerRepositoryImpl;
+use App\Services\CustomerService;
+use App\Services\CustomerServiceImpl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
-    private CustomerRepository $customerRepository;
+    private CustomerService $customerService;
 
     public function __construct()
     {
-        $this->customerRepository = new CustomerRepository();
+        $customerRepository = new CustomerRepositoryImpl();
+        $this->customerService = new CustomerServiceImpl($customerRepository);
     }
 
     public function getCustomers(): JsonResponse
     {
-        return $this->customerRepository->getCustomers();
+        return response()->json([
+            "message" => "success",
+            "status" => 200,
+            "data" => $this->customerService->getCustomers()
+        ], 200);
     }
 
     public function getCustomer($id): JsonResponse
@@ -28,29 +35,41 @@ class CustomerController extends Controller
         ]);
 
         if ($validator->fails()) {
-            throw new \Exception($validator->errors()->first());
+            throw new \Exception($validator->errors()->first(), 400);
         }
-        return response()->json($this->customerRepository->getCustomer($id));
+
+        return response()->json([
+            "message" => "success",
+            "status" => 200,
+            "data" => $this->customerService->getCustomer($id)
+        ], 200);
     }
 
     public function createCustomer(Request $request): JsonResponse
     {
-        $request->validate(
-            ['name' => 'required|string|max:255']
-        );
-        return $this->customerRepository->createCustomer($request->all());
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone_number' => 'required|integer'
+        ]);
+        return response()->json([
+            "message" => "success",
+            "status" => 200,
+            "data" => $this->customerService->createCustomer($request->all())
+        ], 200);
     }
 
     public function updateCustomer(Request $request): JsonResponse
     {
         $request->validate([
             'id' => 'required|integer|exists:customers,id',
+            'name' => 'string|max:255',
+            'phone_number' => 'integer'
         ]);
 
-        if ($request->has('name')) {
-            $request->validate(['name' => 'required|string|max:255']);
-        }
-
-        return $this->customerRepository->updateCustomer($request->id, $request->all());
+        return response()->json([
+            "message" => "success",
+            "status" => 200,
+            "data" => $this->customerService->updateCustomer($request->all())
+        ], 200);
     }
 }
